@@ -8,12 +8,29 @@ const crypto = require('crypto');
  * @prototype
  */
 const jwtBase = function(){
+    /*
+     * @param {string}
+     * @param {string}
+     * @public
+     * @return {object}
+     */
     this.decode = function(token, publickey){
         return decode(token, publickey);
     };
+    /*
+     * @param {object}
+     * @param {string}
+     * @public
+     * @return {string} 
+     */
     this.encode = function(data, privatekey){
         return encode(data, privatekey);
     };
+    /*
+     * @param {string}
+     * @private
+     * @return Buffer
+     */
     const decodeSign = function(sign){
         return (
             Buffer.from(
@@ -21,6 +38,11 @@ const jwtBase = function(){
             ).toString('utf-8')
         );
     };
+    /*
+     * @param {string}
+     * @private
+     * @return {buffer}
+     */
     const decodePayload = function(payload){
         return (
             JSON.parse(
@@ -30,6 +52,11 @@ const jwtBase = function(){
             )
         );
     };
+    /*
+     * @param {string}
+     * @private
+     * @return {object}
+     */
     const decodeHead = function(head){
         return (
             JSON.parse(
@@ -39,6 +66,12 @@ const jwtBase = function(){
             )
         );
     };
+    /*
+     * @param {string}
+     * @param {string}
+     * @private
+     * @return {object}
+     */
     const decode = function(token, publickey){
         let data = {};
         let parts = token.split('.');
@@ -67,6 +100,12 @@ const jwtBase = function(){
         }
         return data;
     };
+    /*
+     * @param {object}
+     * @param {string}
+     * @private
+     * @return {string} 
+     */
     const encode = function(data, privatekey){
         let signer = crypto.createSign('RSA-SHA512');
         signer.update(data), 
