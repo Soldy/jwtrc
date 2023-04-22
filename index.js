@@ -33,9 +33,7 @@ const jwtBase = function(){
      */
     const decodeSign = function(sign){
         return (
-            Buffer.from(
-                sign
-            ).toString('utf-8')
+            Buffer.from(sign, 'base64').toString('utf-8')
         );
     };
     /*
@@ -46,9 +44,7 @@ const jwtBase = function(){
     const decodePayload = function(payload){
         return (
             JSON.parse(
-                Buffer.from(
-                    payload
-                ).toString('utf-8')
+                Buffer.from(payload, 'base64').toString('utf8')
             )
         );
     };
@@ -57,12 +53,10 @@ const jwtBase = function(){
      * @private
      * @return {object}
      */
-    const decodeHead = function(head){
+    const _decodeHead = function(head){
         return (
             JSON.parse(
-                Buffer.from(
-                    head
-                ).toString('utf-8')
+                Buffer.from(head, 'base64').toString('utf8')
             )
         );
     };
@@ -74,30 +68,43 @@ const jwtBase = function(){
      */
     const decode = function(token, publickey){
         let data = {};
-        let parts = token.split('.');
-        if (token.length !==3)
-            return false;
+        let parts = token.toString('utf8').split('.');
+        if (parts.length !==3)
+            throw Error ('Wrong token size : ' + parts.length.toString());
         try{
-            data.head = decodeHead(
+            data.head = _decodeHead(
                 parts[0]
             );
         }catch(e){
-            return false;
+            throw Error (e);
         }
         try{
             data.payload = decodePayload(
                 parts[1]
             );
         }catch(e){
-            return false;
+            throw Error (e);
         }
         try{
             data.sign = decodeSign(
                 parts[2]
             );
         }catch(e){
-            return false;
+            throw Error (e);
         }
+        console.log(parts[2]);
+        console.log(parts[2]);
+        console.log(parts[2]);
+        console.log(parts[2]);
+        console.log(parts[2]);
+        console.log(parts[2]);
+        const verify  =  crypto.createVerify('RSA-SHA512');
+        console.log(verify.verify(
+            publickey,
+            parts[1],
+            Buffer.from(data.sign)
+        ));
+        console.log(JSON.stringify(data.payload));
         return data;
     };
     /*
@@ -108,19 +115,19 @@ const jwtBase = function(){
      */
     const encode = function(data, privatekey){
         let signer = crypto.createSign('RSA-SHA512');
-        signer.update(data), 
-        sign.end();
+        signer.update(Buffer.from(JSON.stringify(data)).toString('base64'));
+        signer.end();
         const sign = signer.sign(privatekey, 'base64');
         const head = {
             typ:'jwt',
             alg:'RS512'
         };
         return (
-            Buffer.from(JSON.stringofy(head)).toString('base64')+
+            Buffer.from(JSON.stringify(head)).toString('base64')+
               '.'+
-              Buffer.from(JSON.stringofy(data)).toString('base64')+
+              Buffer.from(JSON.stringify(data)).toString('base64')+
               '.'+
-              Buffer.from(JSON.stringofy(sign)).toString('base64')
+              sign
         );
     };
 };
